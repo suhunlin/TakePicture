@@ -1,18 +1,41 @@
 package com.suhun.takepicture;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
     private String tag = MainActivity.class.getSimpleName();
     private ImageView img;
+    private ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if(result.getResultCode() == RESULT_OK){
+                        Intent intent = result.getData();
+                        Bundle bundle = intent.getExtras();
+                        Bitmap bitmap = (Bitmap) bundle.get("data");
+                        img.setImageBitmap(bitmap);
+                    }
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 initCamera();
             }else{
                 finish();
+
             }
         }
     }
@@ -61,7 +85,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void takePic1Fun(View view){
-
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        resultLauncher.launch(intent);
     }
 
     public void takePic2Fun(View view){
